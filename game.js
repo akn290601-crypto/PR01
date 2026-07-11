@@ -10,24 +10,30 @@
     neutral:  { name: '中立',   color: '#6b6b6b' },
   };
 
+  // strength: local troop quality multiplier. Varies by province, not just
+  // faction, based on the historical reputation of each region's soldiers
+  // (e.g. Takeda's Kai cavalry, Uesugi's Echigo troops were famously strong;
+  // neutral provinces field untrained local militia).
   const RAW_PROVINCES = [
-    { id: 'echigo',    name: '越後', row: 0, col: 0, faction: 'uesugi' },
-    { id: 'kozuke',    name: '上野', row: 0, col: 1, faction: 'uesugi' },
-    { id: 'musashi',   name: '武蔵', row: 0, col: 2, faction: 'neutral' },
-    { id: 'sagami',    name: '相模', row: 0, col: 3, faction: 'neutral' },
-    { id: 'shinano',   name: '信濃', row: 1, col: 0, faction: 'takeda' },
-    { id: 'kai',       name: '甲斐', row: 1, col: 1, faction: 'takeda' },
-    { id: 'suruga',    name: '駿河', row: 1, col: 2, faction: 'imagawa' },
-    { id: 'izu',       name: '伊豆', row: 1, col: 3, faction: 'imagawa' },
-    { id: 'kaga',      name: '加賀', row: 2, col: 0, faction: 'neutral' },
-    { id: 'mino',      name: '美濃', row: 2, col: 1, faction: 'oda' },
-    { id: 'owari',     name: '尾張', row: 2, col: 2, faction: 'oda' },
-    { id: 'mikawa',    name: '三河', row: 2, col: 3, faction: 'imagawa' },
-    { id: 'yamashiro', name: '山城', row: 3, col: 0, faction: 'neutral' },
-    { id: 'oumi',      name: '近江', row: 3, col: 1, faction: 'neutral' },
-    { id: 'ise',       name: '伊勢', row: 3, col: 2, faction: 'neutral' },
-    { id: 'kii',       name: '紀伊', row: 3, col: 3, faction: 'neutral' },
+    { id: 'echigo',    name: '越後', row: 0, col: 0, faction: 'uesugi',  strength: 1.30 },
+    { id: 'kozuke',    name: '上野', row: 0, col: 1, faction: 'uesugi',  strength: 1.10 },
+    { id: 'musashi',   name: '武蔵', row: 0, col: 2, faction: 'neutral', strength: 0.80 },
+    { id: 'sagami',    name: '相模', row: 0, col: 3, faction: 'neutral', strength: 0.85 },
+    { id: 'shinano',   name: '信濃', row: 1, col: 0, faction: 'takeda',  strength: 1.15 },
+    { id: 'kai',       name: '甲斐', row: 1, col: 1, faction: 'takeda',  strength: 1.30 },
+    { id: 'suruga',    name: '駿河', row: 1, col: 2, faction: 'imagawa', strength: 0.95 },
+    { id: 'izu',       name: '伊豆', row: 1, col: 3, faction: 'imagawa', strength: 0.90 },
+    { id: 'kaga',      name: '加賀', row: 2, col: 0, faction: 'neutral', strength: 0.85 },
+    { id: 'mino',      name: '美濃', row: 2, col: 1, faction: 'oda',     strength: 1.05 },
+    { id: 'owari',     name: '尾張', row: 2, col: 2, faction: 'oda',     strength: 1.00 },
+    { id: 'mikawa',    name: '三河', row: 2, col: 3, faction: 'imagawa', strength: 1.00 },
+    { id: 'yamashiro', name: '山城', row: 3, col: 0, faction: 'neutral', strength: 0.80 },
+    { id: 'oumi',      name: '近江', row: 3, col: 1, faction: 'neutral', strength: 0.85 },
+    { id: 'ise',       name: '伊勢', row: 3, col: 2, faction: 'neutral', strength: 0.80 },
+    { id: 'kii',       name: '紀伊', row: 3, col: 3, faction: 'neutral', strength: 0.85 },
   ];
+
+  const TRAIN_AMOUNT = 40;
 
   let provinces = [];
   let turn = 1;
@@ -80,7 +86,7 @@
 
   function doTrain(p) {
     if (p.soldiers >= p.maxSoldiers) return `${p.name}はこれ以上兵を増やせない`;
-    const amount = Math.min(100, p.maxSoldiers - p.soldiers);
+    const amount = Math.min(TRAIN_AMOUNT, p.maxSoldiers - p.soldiers);
     const cost = amount * 2;
     if (p.gold < cost) return `${p.name}は資金不足で訓練できなかった`;
     p.gold -= cost;
@@ -89,8 +95,8 @@
   }
 
   function doAttack(attacker, defender) {
-    const atkPower = attacker.soldiers * (0.8 + Math.random() * 0.4);
-    const defPower = defender.soldiers * (0.8 + Math.random() * 0.4) * (1 + defender.defense * 0.15);
+    const atkPower = attacker.soldiers * attacker.strength * (0.8 + Math.random() * 0.4);
+    const defPower = defender.soldiers * defender.strength * (0.8 + Math.random() * 0.4) * (1 + defender.defense * 0.15);
     if (atkPower > defPower) {
       const losses = Math.floor(attacker.soldiers * Math.min(0.6, defPower / atkPower));
       attacker.soldiers = Math.max(0, attacker.soldiers - losses);
@@ -253,6 +259,7 @@
       <div><span class="k">石高</span> <span class="v">${p.koku}</span></div>
       <div><span class="k">資金</span> <span class="v">${p.gold}</span></div>
       <div><span class="k">兵力</span> <span class="v">${p.soldiers} / ${p.maxSoldiers}</span></div>
+      <div><span class="k">兵の強さ</span> <span class="v">×${p.strength.toFixed(2)}</span></div>
       <div><span class="k">守備力</span> <span class="v">${p.defense}</span></div>
     `;
 
@@ -293,7 +300,7 @@
       }
       targetsEl.classList.remove('hidden');
       targetsEl.innerHTML = targets.map(t =>
-        `<button class="targetBtn" data-target="${t.id}">${t.name}(${FACTIONS[t.faction].name} / 兵${t.soldiers})</button>`
+        `<button class="targetBtn" data-target="${t.id}">${t.name}(${FACTIONS[t.faction].name} / 兵${t.soldiers} / 強さ×${t.strength.toFixed(2)})</button>`
       ).join('');
       targetsEl.querySelectorAll('.targetBtn').forEach(btn => {
         btn.addEventListener('click', () => {
