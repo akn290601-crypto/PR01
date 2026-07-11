@@ -14,6 +14,11 @@
     <div id="turnInfo">1年目 1月</div>
   </header>
 
+  <div id="playerBar">
+    <span>あなたの家: <strong id="playerFactionLabel">織田家</strong></span>
+    <button id="renameBtn">✎ 名前を変更</button>
+  </div>
+
   <div id="factionBar"></div>
 
   <main id="mapWrap">
@@ -40,6 +45,15 @@
       <h2 id="resultTitle">-</h2>
       <p id="resultText"></p>
       <button id="restartBtn">もう一度プレイ</button>
+    </div>
+  </div>
+
+  <div id="nameOverlay" class="hidden">
+    <div id="nameBox">
+      <h2 id="nameTitle">大名家の名前</h2>
+      <p id="nameDesc">あなたが率いる家の名前を入力してください。</p>
+      <input id="nameInput" type="text" maxlength="10" placeholder="例: 織田家">
+      <button id="nameConfirmBtn">この名前で始める</button>
     </div>
   </div>
 

@@ -193,6 +193,7 @@
   // ---------- Rendering ----------
 
   function render() {
+    document.getElementById('playerFactionLabel').textContent = FACTIONS[PLAYER].name;
     renderTurnInfo();
     renderFactionBar();
     renderMap();
@@ -310,14 +311,49 @@
     queuedActions = {};
     gameOver = false;
     logLines.length = 0;
-    log('織田家の当主として、天下統一を目指せ。');
+    log(`${FACTIONS[PLAYER].name}の当主として、天下統一を目指せ。`);
     document.getElementById('resultOverlay').classList.add('hidden');
     render();
+  }
+
+  // ---------- Faction name input ----------
+
+  let nameMode = 'start'; // 'start' (first launch) or 'rename' (mid-game)
+
+  function openNameModal(mode) {
+    nameMode = mode;
+    const input = document.getElementById('nameInput');
+    input.value = FACTIONS[PLAYER].name;
+    document.getElementById('nameDesc').textContent =
+      mode === 'start' ? 'あなたが率いる家の名前を入力してください。' : '新しい家の名前を入力してください。';
+    document.getElementById('nameConfirmBtn').textContent =
+      mode === 'start' ? 'この名前で始める' : '変更する';
+    document.getElementById('nameOverlay').classList.remove('hidden');
+    input.focus();
+    input.select();
+  }
+
+  function confirmName() {
+    const input = document.getElementById('nameInput');
+    const value = input.value.trim();
+    FACTIONS[PLAYER].name = value || FACTIONS[PLAYER].name;
+    document.getElementById('nameOverlay').classList.add('hidden');
+    if (nameMode === 'start') {
+      init();
+    } else {
+      render();
+    }
   }
 
   document.getElementById('panelClose').addEventListener('click', closePanel);
   document.getElementById('nextTurnBtn').addEventListener('click', resolveTurn);
   document.getElementById('restartBtn').addEventListener('click', init);
+  document.getElementById('renameBtn').addEventListener('click', () => openNameModal('rename'));
+  document.getElementById('nameConfirmBtn').addEventListener('click', confirmName);
+  document.getElementById('nameInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmName();
+  });
 
-  init();
+  document.getElementById('playerFactionLabel').textContent = FACTIONS[PLAYER].name;
+  openNameModal('start');
 })();
