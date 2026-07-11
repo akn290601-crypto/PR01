@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>戦国SLGプロトタイプ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <header id="header">
+    <h1>戦国SLG <span class="sub">プロトタイプ</span></h1>
+    <div id="turnInfo">1年目 1月</div>
+  </header>
+
+  <div id="factionBar"></div>
+
+  <main id="mapWrap">
+    <div id="map"></div>
+  </main>
+
+  <div id="log"></div>
+
+  <button id="nextTurnBtn">次のターン ▶</button>
+
+  <div id="panelOverlay" class="hidden">
+    <div id="panel">
+      <button id="panelClose">✕</button>
+      <h2 id="panelTitle">-</h2>
+      <div id="panelOwner"></div>
+      <div id="panelStats"></div>
+      <div id="panelActions"></div>
+      <div id="panelTargets" class="hidden"></div>
+    </div>
+  </div>
+
+  <div id="resultOverlay" class="hidden">
+    <div id="resultBox">
+      <h2 id="resultTitle">-</h2>
+      <p id="resultText"></p>
+      <button id="restartBtn">もう一度プレイ</button>
+    </div>
+  </div>
+
+</div>
+<script src="game.js"></script>
+</body>
+</html>
