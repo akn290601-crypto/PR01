@@ -117,6 +117,15 @@
     }
   }
 
+  function doMove(source, target) {
+    const room = target.maxSoldiers - target.soldiers;
+    const amount = Math.min(Math.floor(source.soldiers / 2), Math.max(0, room));
+    if (amount <= 0) return `${source.name}から${target.name}へ移動できる兵がいない`;
+    source.soldiers -= amount;
+    target.soldiers += amount;
+    return `${source.name}から${target.name}へ兵を移動した(${amount})`;
+  }
+
   function aiDecide(p) {
     const enemyNeighbors = neighborsOf(p).filter(n => n.faction !== p.faction);
     if (p.soldiers < p.maxSoldiers * 0.5 && p.gold >= 100) {
@@ -165,6 +174,12 @@
       } else if (act.type === 'attack') {
         const target = byId(act.targetId);
         if (target && target.faction !== p.faction) log(doAttack(p, target));
+      } else if (act.type === 'move') {
+        const target = byId(act.targetId);
+        if (target && target.faction === p.faction) {
+          const msg = doMove(p, target);
+          if (isPlayer) log(msg);
+        }
       }
     });
 
@@ -279,6 +294,7 @@
     actionsEl.innerHTML = `
       <button class="actionBtn" id="btnDevelop" ${already ? 'disabled' : ''}>内政(石高を上げる)</button>
       <button class="actionBtn" id="btnTrain" ${already ? 'disabled' : ''}>兵を訓練する</button>
+      <button class="actionBtn" id="btnMove" ${already ? 'disabled' : ''}>兵を移動する</button>
       <button class="actionBtn attack" id="btnAttack" ${already ? 'disabled' : ''}>出兵する</button>
       ${already ? `<div style="font-size:12px;color:#e0c98a;margin-top:6px;">今月のコマンド設定済み</div>` : ''}
     `;
@@ -290,6 +306,24 @@
     document.getElementById('btnTrain').addEventListener('click', () => {
       queuedActions[p.id] = { type: 'train' };
       renderPanel(p);
+    });
+    document.getElementById('btnMove').addEventListener('click', () => {
+      const targets = neighborsOf(p).filter(n => n.faction === p.faction);
+      if (!targets.length) {
+        targetsEl.classList.remove('hidden');
+        targetsEl.innerHTML = `<div style="font-size:12px;color:#8a7d64;">隣接する自国の国がありません</div>`;
+        return;
+      }
+      targetsEl.classList.remove('hidden');
+      targetsEl.innerHTML = targets.map(t =>
+        `<button class="targetBtn" data-target="${t.id}">${t.name}(兵${t.soldiers} / ${t.maxSoldiers}まで収容可)</button>`
+      ).join('');
+      targetsEl.querySelectorAll('.targetBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          queuedActions[p.id] = { type: 'move', targetId: btn.dataset.target };
+          renderPanel(p);
+        });
+      });
     });
     document.getElementById('btnAttack').addEventListener('click', () => {
       const targets = neighborsOf(p).filter(n => n.faction !== p.faction);
